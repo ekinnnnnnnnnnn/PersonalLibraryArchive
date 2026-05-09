@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            Log in
+        </title>
+    </head>
+    <body>
+        <h2>
+            Log in
+        </h2>
+        {% if success=='regsok' %}
+            <p>
+                Registration is successful! You can log in
+            </p>
+        {% endif %}
+        {% if error %}
+            <p>
+                {{error}}
+            </p>
+        {% endif %}
+        <form action="/login" method="post">
+            Username: <input type="text" name="username" required><br><br>
+            Password: <input type="password" name="pw" required><br><br>
+            <input type="submit" value="login">
+        </form>
+        <br>
+        <a href="/register">
+            Dont have account yet? Lets register!
+        </a>
+    </body>
+</html>
