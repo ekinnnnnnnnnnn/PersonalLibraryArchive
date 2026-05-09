@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            Adding book
+        </title>
+    </head>
+    <body>
+        <h2>
+            Add book
+        </h2>
+        <form action="/addbook" method="post">
+            Book name: <input type="text" name="bookname" required><br><br>
+            Author: <input type="text" name="author" required><br><br>
+            Status: 
+            <select name="status">
+                <option value="not read yet">not read yet</option>
+                <option value="is being read">is being read</option>
+                <option value="have been read">have been read</option>
+            </select><br><br>
+        </form>
+        <br>
+        <a href="/">Return library</a>
+    </body>
+</html>
