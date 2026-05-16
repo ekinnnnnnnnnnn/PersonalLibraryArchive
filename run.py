@@ -68,6 +68,10 @@ def login():
             error="wrong username or pw"
     return render_template("login.html",error=error,success=success)
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 
 
