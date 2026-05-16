@@ -13,6 +13,7 @@ def saltink(len=12):
 
 def dbconn(db):
     conn=sqlite3.connect(db)
+    conn.row_factory=sqlite3.Row
     return conn
 
 def hashink(pw,salt):
@@ -89,6 +90,17 @@ def addbook():
         conn.close()
         return redirect(url_for('index'))
     return render_template("addbook.html")
+
+@app.route('/deletebook/<int:bookid>')
+def deleteBook(bookid):
+    if 'usersid' not in session:
+        return redirect(url_for('login'))
+    conn=dbconn(DATABASE)
+    conn.execute("delete from books where id=? and userid=?",
+                 (bookid,session['usersid']))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
 
 
 

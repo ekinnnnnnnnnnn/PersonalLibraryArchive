@@ -17,5 +17,26 @@
             Exit.
         </a>
         <hr>
+        <h3>
+            Books
+        </h3>
+        {% if books %}
+            <ul>
+                {% for book in books %}
+                    <li>
+                        <a href="/book/{{book['id']}}">
+                            {{book['bookname']}} - {{book['author']}} - {{book['type']}} - {{book['status']}} 
+                        </a>
+                        <a href="/deletebook/{{book['id']}}" onclick="return confirm('sure?')">
+                            Delete
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+                <p>
+                    No book added yet
+                </p>
+            {% endif %}
     </body>
 </html>
