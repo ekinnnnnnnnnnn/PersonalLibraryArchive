@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            {{book['bookname']}} detail
+        </title>
+    </head>
+    <body>
+        <h2>
+            {{book['bookname']}}
+        </h2>
+        <p>
+            Author: {{book['author']}}
+        </p>
+        <p>
+            Type: {{book['type']}}
+        </p>
+        <p>
+            Status: {{book['status']}}
+        </p>
+        <hr>
+        <h3>
+            Add comment
+        </h3>
+        <form action="/book/{{book['id']}}" method="post">
+            <textarea name="comment" placeholder="Your comments about book {{book['bookname']}} required"></textarea>
+            <br>
+            <input type="submit" value="Comment">
+        </form>
+        <h3>
+            Comments
+        </h3>
+        {% if comments %}
+            {% for c in comments %}
+                <p>
+                    ({{c['username']}}) ({{c['date']}})
+                </p>
+                <p>
+                    {{c['comment']}}
+                </p>
+            {% endfor %}
+        {% else %}
+                <p>
+                    No comment here
+                </p>
+        {% endif %}
+        <br>
+        <a href="/">
+            Go back
+        </a>
+    </body>
+</html>

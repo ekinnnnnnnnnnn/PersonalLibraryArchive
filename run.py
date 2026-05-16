@@ -102,7 +102,27 @@ def deleteBook(bookid):
     conn.close()
     return redirect(url_for('index'))
 
-
+@app.route('/book/<int:bookid>', methods=['GET', 'POST'])
+def bookDetail(bookid):
+    if 'usersid' not in session:
+        return redirect(url_for('login'))
+    conn=dbconn(DATABASE)
+    book=conn.execute("select * from books where id=? and userid=?",
+                      (bookid,session['usersid'])).fetchone()
+    if request.method=='POST':
+        comm=request.form.get('comment','').strip()
+        if comm:
+            conn.execute("insert into comments(bookid,userid,comment) values (?,?,?)",
+                         (bookid,session['usersid'],comm))
+            conn.commit()
+        conn.close()
+        return redirect(url_for('bookDetail',bookid=bookid))
+    comments=conn.execute("select c.id,c.comment,c.date,u.username "
+                          "from comments c join user u on c.userid=u.id "
+                          "where c.bookid=? order by c.date desc ",
+                          (bookid,)).fetchall()
+    conn.close()
+    return render_template("bookdetail.html",book=book,comments=comments)
 
 
 
