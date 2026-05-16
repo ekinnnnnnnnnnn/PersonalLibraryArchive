@@ -14,6 +14,7 @@ c.execute('''create table if not exists books(
           userid integer not null,
           bookname text not null,
           author text not null,
+          type text not null,
           status text default 'not read yet',
           foreign key (userid) references user(id))''')
 

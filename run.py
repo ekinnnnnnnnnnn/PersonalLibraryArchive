@@ -60,18 +60,42 @@ def login():
         user=conn.execute("select id,pw,salt from user where username=?",
                           (username,)).fetchone()
         conn.close()
-        if user and hashink(pw,user['salt'])==user['pw']:
-            session['usersid']=user['id']
+        if user and hashink(pw,user[2])==user[1]:
+            session['usersid']=user[0]
             session['username']=username
             return redirect(url_for('index'))
         else:
             error="wrong username or pw"
     return render_template("login.html",error=error,success=success)
 
-@app.route('/logout')
-def logout():
+@app.route('/exit')
+def exit():
     session.clear()
     return redirect(url_for('login'))
+
+@app.route('/addbook',methods=['GET', 'POST'])
+def addbook():
+    if 'usersid' not in session:
+        return redirect(url_for('login'))
+    if request.method=='POST':
+        bookname=request.form['bookname']
+        author=request.form['author']
+        type=request.form['type']
+        status=request.form['status','not read yet']
+        conn=dbconn(DATABASE)
+        conn.execute("insert into books(userid,bookname,author,type,status) values (?,?,?,?,?)",
+                     (session['usersid'],bookname,author,type,status))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+    return render_template("addbook.html")
+
+
+
+
+
+
+
 
 
 
