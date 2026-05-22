@@ -20,6 +20,20 @@
         <h3>
             Books
         </h3>
+        <form method="get" action="/">
+            <label for="q">Search: </label>
+            <input type="text" name="search" id="search" placeholder="Book name or Author name..." value="{{ request.args.get('search', '') }}">
+            <label for="status">Status Filter: </label>
+            <select name="status" id="status">
+                <option value="" {% if not request.args.get('status') %}selected{% endif %}>All Status'</option>
+                <option value="not read yet" {% if request.args.get('status') == 'not read yet' %}selected{% endif %}>Not read yet</option>
+                <option value="reading" {% if request.args.get('status') == 'reading' %}selected{% endif %}>Reading</option>
+                <option value="read" {% if request.args.get('status') == 'read' %}selected{% endif %}>Read</option>
+            </select>
+        
+            <input type="submit" value="Filter">
+        </form>
+    <br>
         {% if books %}
             <ul>
                 {% for book in books %}

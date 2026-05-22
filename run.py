@@ -23,9 +23,21 @@ def hashink(pw,salt):
 def index():
     if 'usersid' not in session:
         return redirect(url_for('login'))
+    searchQuery = request.args.get('search', '').strip()
+    status = request.args.get('status', '').strip()
     conn=dbconn(DATABASE)
-    books=conn.execute("select * from books where userid=? order by id desc",
-                       (session['usersid'],)).fetchall()
+    query = "select * from books where userid=?"
+    params = [session['usersid']]
+    if searchQuery:
+        query += " and (bookname like ? or author like ?)"
+        params.append(f"%{searchQuery}%")
+        params.append(f"%{searchQuery}%") 
+    if status:
+        query += " and status=?"
+        params.append(status)
+    query += " order by id desc"
+
+    books = conn.execute(query, params).fetchall()
     conn.close()
     return render_template("index.html",
                             username=session['username'],
