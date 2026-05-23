@@ -26,7 +26,7 @@
             <label for="status">Status Filter: </label>
             <select name="status" id="status">
                 <option value="" {% if not request.args.get('status') %}selected{% endif %}>All Status'</option>
-                <option value="not read yet" {% if request.args.get('status') == 'not read yet' %}selected{% endif %}>Not read yet</option>
+                <option value="not read" {% if request.args.get('status') == 'not read' %}selected{% endif %}>Not read yet</option>
                 <option value="reading" {% if request.args.get('status') == 'reading' %}selected{% endif %}>Reading</option>
                 <option value="read" {% if request.args.get('status') == 'read' %}selected{% endif %}>Read</option>
             </select>

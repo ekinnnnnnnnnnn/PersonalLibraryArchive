@@ -94,7 +94,7 @@ def addbook():
         bookname=request.form['bookname']
         author=request.form['author']
         type=request.form['type']
-        status=request.form.get('status','not read yet')
+        status=request.form.get('status','not read')
         conn=dbconn(DATABASE)
         conn.execute("insert into books(userid,bookname,author,type,status) values (?,?,?,?,?)",
                      (session['usersid'],bookname,author,type,status))
