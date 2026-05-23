@@ -44,6 +44,7 @@
                               {{book['type']}} -
                                {{book['status']}} -
                                 {% if book['rating'] %}{{book['rating']}}/10{% else %}No rating{% endif %}
+                                {{book['rPage']}}/{{book['tPage']}} pages read
                         </a>
                         <a href="/deletebook/{{book['id']}}" onclick="return confirm('sure?')">
                             Delete

@@ -10,10 +10,17 @@
         <h2>
             Add book
         </h2>
+        {% if error %}
+        <p>
+            {{ error }}
+        </p>
+        {% endif %}
         <form action="/addbook" method="post">
             Book name: <input type="text" name="bookname" required><br><br>
             Author: <input type="text" name="author" required><br><br>
             Type: <input type="text" name="type" required><br><br>
+            Total Page: <input type="text" name="tPage" required><br><br>
+            Read Page: <input type="text" name="rPage"><br><br>
             Status: 
             <select name="status">
                 <option value="not read">not read</option>

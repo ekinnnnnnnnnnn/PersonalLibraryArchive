@@ -17,6 +17,8 @@ c.execute('''create table if not exists books(
           type text not null,
           status text default 'not read',
           rating integer,
+          tPage integer not null,
+          rPage integer default 0,
           foreign key (userid) references user(id))''')
 
 c.execute('''create table if not exists comments(

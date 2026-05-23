@@ -98,9 +98,19 @@ def addbook():
         rating=None
         if status=='read' and request.form.get('rating'):
             rating=int(request.form['rating'])
+        tPage=request.form.get('tPage')
+        rPage=request.form.get('rPage')
+        try:
+            total=int(tPage)
+            read=int(rPage)
+            if read>total:
+                return render_template("addbook.html",error="read pages cannot exceed total pages")
+        except ValueError:
+            return render_template("addbook.html",error="total and read pages must be numbers")
+
         conn=dbconn(DATABASE)
-        conn.execute("insert into books(userid,bookname,author,type,status,rating) values (?,?,?,?,?,?)",
-                     (session['usersid'],bookname,author,type,status,rating))
+        conn.execute("insert into books(userid,bookname,author,type,status,rating,tPage,rPage) values (?,?,?,?,?,?,?,?)",
+                     (session['usersid'],bookname,author,type,status,rating,tPage,rPage))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))

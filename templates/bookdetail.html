@@ -17,8 +17,15 @@
             Type: {{book['type']}}
         </p>
         <p>
+            Total Pages: {{book['tPage']}}
+        </p>
+        <p>
+            Read Pages: {{book['rPage']}}
+        </p>
+        <p>
             Status: {{book['status']}}
         </p>
+        
         <p>
             Rating {% if book['rating'] %}{{book['rating']}}/10{% else %}No Rating{% endif %}
         </p>
