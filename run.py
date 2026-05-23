@@ -95,9 +95,12 @@ def addbook():
         author=request.form['author']
         type=request.form['type']
         status=request.form.get('status','not read')
+        rating=None
+        if status=='read' and request.form.get('rating'):
+            rating=int(request.form['rating'])
         conn=dbconn(DATABASE)
-        conn.execute("insert into books(userid,bookname,author,type,status) values (?,?,?,?,?)",
-                     (session['usersid'],bookname,author,type,status))
+        conn.execute("insert into books(userid,bookname,author,type,status,rating) values (?,?,?,?,?,?)",
+                     (session['usersid'],bookname,author,type,status,rating))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
@@ -122,8 +125,23 @@ def bookDetail(bookid):
     book=conn.execute("select * from books where id=? and userid=?",
                       (bookid,session['usersid'])).fetchone()
     if request.method=='POST':
-        comm=request.form.get('comment','').strip()
-        if comm:
+        formType=request.form.get('formType')
+        if formType=='status':
+            nstat=request.form.get('status')
+            if nstat and nstat in ('not read','reading','read'):
+                conn.execute("update books set status=? where id=? and userid=?",
+                             (nstat,bookid,session['usersid']))
+                if nstat!='read':
+                    conn.execute("update books set rating=null where id=? and userid=?",
+                                 (bookid,session['usersid']))
+                conn.commit()
+        elif formType=='rating':
+            if book and book['status']=='read' and request.form.get('rating'):
+                conn.execute("update books set rating=? where id=? and userid=?",
+                             (int(request.form['rating']),bookid,session['usersid']))
+                conn.commit()
+        elif formType=='comment':
+            comm=request.form.get('comment','').strip() 
             conn.execute("insert into comments(bookid,userid,comment) values (?,?,?)",
                          (bookid,session['usersid'],comm))
             conn.commit()

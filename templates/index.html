@@ -39,7 +39,11 @@
                 {% for book in books %}
                     <li>
                         <a href="/book/{{book['id']}}">
-                            {{book['bookname']}} - {{book['author']}} - {{book['type']}} - {{book['status']}} 
+                            {{book['bookname']}} -
+                             {{book['author']}} -
+                              {{book['type']}} -
+                               {{book['status']}} -
+                                {% if book['rating'] %}{{book['rating']}}/10{% else %}No rating{% endif %}
                         </a>
                         <a href="/deletebook/{{book['id']}}" onclick="return confirm('sure?')">
                             Delete

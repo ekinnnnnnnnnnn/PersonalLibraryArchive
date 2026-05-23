@@ -19,11 +19,49 @@
         <p>
             Status: {{book['status']}}
         </p>
+        <p>
+            Rating {% if book['rating'] %}{{book['rating']}}/10{% else %}No Rating{% endif %}
+        </p>
+        <hr>
+        <h3>
+            Change Status
+        </h3>
+        <form action="/book/{{book['id']}}" method="post">
+            <input type="hidden" name="formType" value="status">
+            <select name="status">
+                <option value="not read" {% if book['status']=='not read' %}selected{% endif %}>not read</option>
+                <option value="reading" {% if book['status']=='reading' %}selected{% endif %}>reading</option>
+                <option value="read" {% if book['status']=='read' %}selected{% endif %}>read</option>
+            </select>
+            <input type="submit" value="Update Status">
+        </form>
+        {% if book['status']=='read' %}
+            <h3>
+                Rate this book
+            </h3>
+            <form action="/book/{{book['id']}}" method="post">
+                <input type="hidden" name="formType" value="rating">
+                Rating 1-10
+                <select name="rating" required>
+                    {% for i in range(1,11) %}
+                    <option value="{{i}}" {% if book['rating']==i %}selected{% endif %}>
+                        {{i}}/10
+                    </option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Rate">
+            </form>
+            {% else %}
+            <p>
+                Change status to "read" to rate this book.
+            </p>
+            {% endif %}
         <hr>
         <h3>
             Add comment
         </h3>
         <form action="/book/{{book['id']}}" method="post">
+            <input type="hidden" name="formType" value="comment">
             <textarea name="comment" placeholder="Your comments about book {{book['bookname']}} required"></textarea>
             <br>
             <input type="submit" value="Comment">
