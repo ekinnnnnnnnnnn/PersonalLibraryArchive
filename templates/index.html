@@ -30,7 +30,16 @@
                 <option value="reading" {% if request.args.get('status') == 'reading' %}selected{% endif %}>Reading</option>
                 <option value="read" {% if request.args.get('status') == 'read' %}selected{% endif %}>Read</option>
             </select>
-        
+            <label for="sort">Sort: </label>
+            <select name="sort" id="sort">
+                <option value="newest"  {% if sort=='newest'  %}selected{% endif %}>Newest first</option>
+                <option value="oldest"  {% if sort=='oldest'  %}selected{% endif %}>Oldest first</option>
+                <option value="nameAZ" {% if sort=='nameAZ' %}selected{% endif %}>Name A-Z</option>
+                <option value="nameZA" {% if sort=='nameZA' %}selected{% endif %}>Name Z-A</option>
+                <option value="author"  {% if sort=='author'  %}selected{% endif %}>Author A-Z</option>
+                <option value="rating"  {% if sort=='rating'  %}selected{% endif %}>Rating (high-low)</option>
+                <option value="progress"{% if sort=='progress'%}selected{% endif %}>Progress (high-low)</option>
+            </select>
             <input type="submit" value="Filter">
         </form>
     <br>
@@ -42,6 +51,7 @@
                             <img src="{{ url_for('static', filename='uploads/' ~ book['imageF']) }}" alt="Book Image" style="width:50px;height:auto;">
                         {% endif %}
                         <a href="/book/{{book['id']}}">
+                            {{book['id']}}-
                             {{book['bookname']}} -
                              {{book['author']}} -
                               {{book['type']}} -

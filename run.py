@@ -29,6 +29,17 @@ def index():
         return redirect(url_for('login'))
     searchQuery = request.args.get('search', '').strip()
     status = request.args.get('status', '').strip()
+    sort = request.args.get('sort', 'newest').strip()
+    sortOptions = {
+        'newest': 'id DESC',
+        'oldest': 'id ASC',
+        'nameAZ': 'bookname ASC',
+        'nameZA': 'bookname DESC',
+        'author': 'author ASC',
+        'rating': 'rating DESC',
+        'progress': '(rPage / tPage) DESC',
+    }
+    orderBy = sortOptions.get(sort, 'id DESC')
     conn=dbconn(DATABASE)
     query = "select * from books where userid=?"
     params = [session['usersid']]
@@ -39,13 +50,14 @@ def index():
     if status:
         query += " and status=?"
         params.append(status)
-    query += " order by id desc"
+    query += f" order by {orderBy}"
 
     books = conn.execute(query, params).fetchall()
     conn.close()
     return render_template("index.html",
                             username=session['username'],
-                            books=books)
+                            books=books,
+                            sort=sort)
 
 @app.route('/register',methods=['GET', 'POST'])
 def register():
