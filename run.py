@@ -2,11 +2,15 @@ from flask import *
 import hashlib
 import secrets
 import sqlite3
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "evdemeleksokaktaiseseytandegiltanrinintakendisi"
 
 DATABASE="Lib.db"
+uploadFolder = os.path.join('static', 'uploads')
+os.makedirs(uploadFolder, exist_ok=True)
 
 def saltink(len=12):
     return secrets.token_hex(len)
@@ -107,10 +111,24 @@ def addbook():
                 return render_template("addbook.html",error="read pages cannot exceed total pages")
         except ValueError:
             return render_template("addbook.html",error="total and read pages must be numbers")
+        
+        pdfFile = request.files.get('pdfFile')
+        imageFile = request.files.get('imageFile')
+        pdfFilename = None
+        imageFilename = None
+        if pdfFile and pdfFile.filename:
+            pdfFilename = secure_filename(pdfFile.filename)
+            pdfPath = os.path.join(uploadFolder, pdfFilename)
+            pdfFile.save(os.path.join(uploadFolder, pdfFilename))
+
+        if imageFile and imageFile.filename:
+            imageFilename = secure_filename(imageFile.filename)
+            imagePath = os.path.join(uploadFolder, imageFilename)
+            imageFile.save(os.path.join(uploadFolder, imageFilename))
 
         conn=dbconn(DATABASE)
-        conn.execute("insert into books(userid,bookname,author,type,status,rating,tPage,rPage) values (?,?,?,?,?,?,?,?)",
-                     (session['usersid'],bookname,author,type,status,rating,tPage,rPage))
+        conn.execute("insert into books(userid,bookname,author,type,status,rating,tPage,rPage,pdfF,imageF) values (?,?,?,?,?,?,?,?,?,?)",
+                     (session['usersid'],bookname,author,type,status,rating,tPage,rPage,pdfFilename,imageFilename))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
@@ -150,6 +168,24 @@ def bookDetail(bookid):
                 conn.execute("update books set rating=? where id=? and userid=?",
                              (int(request.form['rating']),bookid,session['usersid']))
                 conn.commit()
+        elif formType=='edit':
+            bookname=request.form.get('bookname')
+            author=request.form.get('author')
+            btype=request.form.get('type')
+            tPage=request.form.get('tPage')
+            rPage=request.form.get('rPage')
+            pdfFilename=book['pdfF']
+            imageFilename=book['imageF']
+            pdfFile=request.files.get('pdf')
+            imageFile=request.files.get('image')
+            if pdfFile and pdfFile.filename:
+                pdfFilename=secure_filename(pdfFile.filename)
+                pdfFile.save(os.path.join(uploadFolder, pdfFilename))
+            if imageFile and imageFile.filename:
+                imageFilename=secure_filename(imageFile.filename)
+                imageFile.save(os.path.join(uploadFolder, imageFilename))
+            conn.execute("update books set bookname=?,author=?,type=?,tPage=?,rPage=?,pdfF=?,imageF=? where id=? and userid=?",
+                         (bookname,author,btype,tPage,rPage,pdfFilename,imageFilename,bookid,session['usersid']))
         elif formType=='comment':
             comm=request.form.get('comment','').strip() 
             conn.execute("insert into comments(bookid,userid,comment) values (?,?,?)",

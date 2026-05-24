@@ -29,6 +29,18 @@
         <p>
             Rating {% if book['rating'] %}{{book['rating']}}/10{% else %}No Rating{% endif %}
         </p>
+        {% if book['imageF'] %}
+            <p>
+                <img src="{{ url_for('static', filename='uploads/' ~ book['imageF']) }}" alt="Book Image" style="width:200px;height:auto;">
+            </p>
+        {% endif %}
+        {% if book['pdfF'] %}
+            <p>
+                <a href="{{ url_for('static', filename='uploads/' ~ book['pdfF']) }}" target="_blank">
+                    View PDF
+                </a>
+            </p>
+        {% endif %}
         <hr>
         <h3>
             Change Status
@@ -63,6 +75,21 @@
                 Change status to "read" to rate this book.
             </p>
             {% endif %}
+        <hr>
+        <h3>
+            Edit Book
+        </h3>
+        <form action="/book/{{book['id']}}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="formType" value="edit">
+            Book name: <input type="text" name="bookname" value="{{book['bookname']}}"><br><br>
+            Author: <input type="text" name="author" value="{{book['author']}}"><br><br>
+            Type: <input type="text" name="type" value="{{book['type']}}"><br><br>
+            Total Page: <input type="text" name="tPage" value="{{book['tPage']}}"><br><br>
+            Read Page: <input type="text" name="rPage" value="{{book['rPage']}}"><br><br>
+            PDF: <input type="file" name="pdf" accept=".pdf"><br><br>
+            Image: <input type="file" name="image" accept="image/*"><br><br>
+            <input type="submit" value="Save">
+        </form>
         <hr>
         <h3>
             Add comment

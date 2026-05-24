@@ -38,6 +38,9 @@
             <ul>
                 {% for book in books %}
                     <li>
+                        {% if book['imageF'] %}
+                            <img src="{{ url_for('static', filename='uploads/' ~ book['imageF']) }}" alt="Book Image" style="width:50px;height:auto;">
+                        {% endif %}
                         <a href="/book/{{book['id']}}">
                             {{book['bookname']}} -
                              {{book['author']}} -
@@ -45,6 +48,14 @@
                                {{book['status']}} -
                                 {% if book['rating'] %}{{book['rating']}}/10{% else %}No rating{% endif %}
                                 {{book['rPage']}}/{{book['tPage']}} pages read
+                        </a>
+                        {% if book['pdfF'] %}
+                            <a href="{{ url_for('static', filename='uploads/' ~ book['pdfF']) }}" target="_blank">
+                                [PDF]
+                            </a>
+                        {% endif %}
+                        <a href="/book/{{book['id']}}">
+                            Edit
                         </a>
                         <a href="/deletebook/{{book['id']}}" onclick="return confirm('sure?')">
                             Delete
