@@ -114,8 +114,10 @@ def addbook():
         rating=None
         if status=='read' and request.form.get('rating'):
             rating=int(request.form['rating'])
-        tPage=request.form.get('tPage')
-        rPage=request.form.get('rPage')
+        tPage = request.form.get('tPage','').strip()
+        rPage = request.form.get('rPage','0').strip() or '0'
+        if status=='read':
+            rPage=tPage
         try:
             total=int(tPage)
             read=int(rPage)
@@ -164,14 +166,18 @@ def bookDetail(bookid):
     conn=dbconn(DATABASE)
     book=conn.execute("select * from books where id=? and userid=?",
                       (bookid,session['usersid'])).fetchone()
+    if book is None:
+        conn.close()
+        return redirect(url_for('index'))
     if request.method=='POST':
         formType=request.form.get('formType')
         if formType=='status':
             nstat=request.form.get('status')
             if nstat and nstat in ('not read','reading','read'):
-                conn.execute("update books set status=? where id=? and userid=?",
-                             (nstat,bookid,session['usersid']))
-                if nstat!='read':
+                if nstat == 'read':
+                    conn.execute("update books set status=?, rPage=tPage where id=? and userid=?",
+                                 (nstat,bookid,session['usersid']))
+                else:
                     conn.execute("update books set rating=null where id=? and userid=?",
                                  (bookid,session['usersid']))
                 conn.commit()
@@ -198,11 +204,13 @@ def bookDetail(bookid):
                 imageFile.save(os.path.join(uploadFolder, imageFilename))
             conn.execute("update books set bookname=?,author=?,type=?,tPage=?,rPage=?,pdfF=?,imageF=? where id=? and userid=?",
                          (bookname,author,btype,tPage,rPage,pdfFilename,imageFilename,bookid,session['usersid']))
-        elif formType=='comment':
-            comm=request.form.get('comment','').strip() 
-            conn.execute("insert into comments(bookid,userid,comment) values (?,?,?)",
-                         (bookid,session['usersid'],comm))
             conn.commit()
+        elif formType=='comment':
+            comm=request.form.get('comment','').strip()
+            if comm:
+                conn.execute("insert into comments(bookid,userid,comment) values (?,?,?)",
+                            (bookid,session['usersid'],comm))
+                conn.commit()
         conn.close()
         return redirect(url_for('bookDetail',bookid=bookid))
     comments=conn.execute("select c.id,c.comment,c.date,u.username "
