@@ -177,9 +177,12 @@ def bookDetail(bookid):
                 if nstat == 'read':
                     conn.execute("update books set status=?, rPage=tPage where id=? and userid=?",
                                  (nstat,bookid,session['usersid']))
+                elif nstat == 'reading':
+                    conn.execute("update books set status=?, rating=null where id=? and userid=?",
+                                 (nstat,bookid,session['usersid']))
                 else:
-                    conn.execute("update books set rating=null where id=? and userid=?",
-                                 (bookid,session['usersid']))
+                    conn.execute("update books set status=?, rating=null, rPage=0 where id=? and userid=?",
+                                 (nstat,bookid,session['usersid']))
                 conn.commit()
         elif formType=='rating':
             if book and book['status']=='read' and request.form.get('rating'):
