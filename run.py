@@ -6,7 +6,7 @@ import os
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = "evdemeleksokaktaiseseytandegiltanrinintakendisi"
+app.secret_key = secrets.token_hex(24)
 
 DATABASE="Lib.db"
 uploadFolder = os.path.join('static', 'uploads')
@@ -17,6 +17,7 @@ def saltink(len=12):
 
 def dbconn(db):
     conn=sqlite3.connect(db)
+    conn.execute("PRAGMA foreign_keys = ON;")
     conn.row_factory=sqlite3.Row
     return conn
 
@@ -31,26 +32,31 @@ def index():
     status = request.args.get('status', '').strip()
     sort = request.args.get('sort', 'newest').strip()
     sortOptions = {
-        'newest': 'id DESC',
-        'oldest': 'id ASC',
-        'nameAZ': 'bookname ASC',
-        'nameZA': 'bookname DESC',
-        'author': 'author ASC',
-        'rating': 'rating DESC',
-        'progress': '(rPage / tPage) DESC',
+        'newest': 'b.id DESC',
+        'oldest': 'b.id ASC',
+        'nameAZ': 'b.bookname ASC',
+        'nameZA': 'b.bookname DESC',
+        'author': 'b.author ASC',
+        'rating': 'b.rating DESC',
+        'progress': '(b.rPage * 1.0 / b.tPage) DESC',
     }
-    orderBy = sortOptions.get(sort, 'id DESC')
+    orderBy = sortOptions.get(sort, 'b.id DESC')
     conn=dbconn(DATABASE)
-    query = "select * from books where userid=?"
+    query = """
+        SELECT b.*, COUNT(c.id) AS comment_count
+        FROM books b
+        LEFT JOIN comments c ON b.id = c.bookid
+        WHERE b.userid = ?
+    """
     params = [session['usersid']]
     if searchQuery:
-        query += " and (bookname like ? or author like ?)"
-        params.append(f"%{searchQuery}%")
-        params.append(f"%{searchQuery}%") 
+        query += " AND (b.bookname LIKE ? OR b.author LIKE ? OR b.type LIKE ? OR c.comment LIKE ?)"
+        pattern = f"%{searchQuery}%"
+        params.extend([pattern, pattern, pattern, pattern])
     if status:
-        query += " and status=?"
+        query += " AND b.status = ?"
         params.append(status)
-    query += f" order by {orderBy}"
+    query += f" GROUP BY b.id ORDER BY {orderBy}"
 
     books = conn.execute(query, params).fetchall()
     conn.close()
@@ -111,7 +117,7 @@ def addbook():
         author=request.form['author']
         type=request.form['type']
         status=request.form.get('status','not read')
-        rating=None
+        rating=0
         if status=='read' and request.form.get('rating'):
             rating=int(request.form['rating'])
         tPage = request.form.get('tPage','').strip()
@@ -126,10 +132,11 @@ def addbook():
         except ValueError:
             return render_template("addbook.html",error="total and read pages must be numbers")
         
+        comment = request.form.get('comment', '').strip()
         pdfFile = request.files.get('pdfFile')
         imageFile = request.files.get('imageFile')
-        pdfFilename = None
-        imageFilename = None
+        pdfFilename = 'not uploaded'
+        imageFilename = 'not uploaded'
         if pdfFile and pdfFile.filename:
             pdfFilename = secure_filename(pdfFile.filename)
             pdfPath = os.path.join(uploadFolder, pdfFilename)
@@ -140,9 +147,14 @@ def addbook():
             imagePath = os.path.join(uploadFolder, imageFilename)
             imageFile.save(os.path.join(uploadFolder, imageFilename))
 
-        conn=dbconn(DATABASE)
-        conn.execute("insert into books(userid,bookname,author,type,status,rating,tPage,rPage,pdfF,imageF) values (?,?,?,?,?,?,?,?,?,?)",
+        conn = dbconn(DATABASE)
+        cursor = conn.cursor()
+        cursor.execute("insert into books(userid,bookname,author,type,status,rating,tPage,rPage,pdfF,imageF) values (?,?,?,?,?,?,?,?,?,?)",
                      (session['usersid'],bookname,author,type,status,rating,tPage,rPage,pdfFilename,imageFilename))
+        newbookid = cursor.lastrowid
+        if comment:
+            cursor.execute("insert into comments(bookid,userid,comment) values (?,?,?)",
+                           (newbookid, session['usersid'], comment))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
@@ -153,8 +165,8 @@ def deleteBook(bookid):
     if 'usersid' not in session:
         return redirect(url_for('login'))
     conn=dbconn(DATABASE)
-    conn.execute("delete from books where id=? and userid=?",
-                 (bookid,session['usersid']))
+    conn.execute("delete from comments where bookid=?", (bookid,))
+    conn.execute("delete from books where id=? and userid=?", (bookid, session['usersid']))
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
@@ -178,10 +190,10 @@ def bookDetail(bookid):
                     conn.execute("update books set status=?, rPage=tPage where id=? and userid=?",
                                  (nstat,bookid,session['usersid']))
                 elif nstat == 'reading':
-                    conn.execute("update books set status=?, rating=null where id=? and userid=?",
+                    conn.execute("update books set status=?, rating=0 where id=? and userid=?",
                                  (nstat,bookid,session['usersid']))
                 else:
-                    conn.execute("update books set status=?, rating=null, rPage=0 where id=? and userid=?",
+                    conn.execute("update books set status=?, rating=0, rPage=0 where id=? and userid=?",
                                  (nstat,bookid,session['usersid']))
                 conn.commit()
         elif formType=='rating':

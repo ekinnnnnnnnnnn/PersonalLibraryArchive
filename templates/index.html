@@ -22,7 +22,7 @@
         </h3>
         <form method="get" action="/">
             <label for="q">Search: </label>
-            <input type="text" name="search" id="search" placeholder="Book name or Author name..." value="{{ request.args.get('search', '') }}">
+            <input type="text" name="search" id="search" placeholder="Search book, author, type or comments..." value="{{ request.args.get('search', '') }}">
             <label for="status">Status Filter: </label>
             <select name="status" id="status">
                 <option value="" {% if not request.args.get('status') %}selected{% endif %}>All Status'</option>
@@ -47,19 +47,19 @@
             <ul>
                 {% for book in books %}
                     <li>
-                        {% if book['imageF'] %}
+                        {% if book['imageF'] and book['imageF'] != 'not uploaded' %}
                             <img src="{{ url_for('static', filename='uploads/' ~ book['imageF']) }}" alt="Book Image" style="width:50px;height:auto;">
                         {% endif %}
                         <a href="/book/{{book['id']}}">
-                            {{book['id']}}-
                             {{book['bookname']}} -
                              {{book['author']}} -
                               {{book['type']}} -
                                {{book['status']}} -
-                                {% if book['rating'] %}{{book['rating']}}/10{% else %}No rating{% endif %}
-                                {{book['rPage']}}/{{book['tPage']}} pages read
+                                {% if book['rating'] and book['rating'] > 0 %}{{book['rating']}}/10{% else %}No rating{% endif %} -
+                                {{book['rPage']}}/{{book['tPage']}} pages read -
+                                💬 {{book['comment_count']}} comments
                         </a>
-                        {% if book['pdfF'] %}
+                        {% if book['pdfF'] and book['pdfF'] != 'not uploaded' %}
                             <a href="{{ url_for('static', filename='uploads/' ~ book['pdfF']) }}" target="_blank">
                                 [PDF]
                             </a>

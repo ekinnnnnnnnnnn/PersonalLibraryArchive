@@ -17,10 +17,10 @@
         {% endif %}
         <form action="/addbook" method="post" enctype="multipart/form-data">
             Book name: <input type="text" name="bookname" required><br><br>
-            Author: <input type="text" name="author" required><br><br>
-            Type: <input type="text" name="type" required><br><br>
-            Total Page: <input type="text" name="tPage" required><br><br>
-            Read Page: <input type="text" name="rPage"><br><br>
+            Author: <input type="text" name="author" pattern="[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+" title="Author name must contain only letters and spaces." required><br><br>
+            Type: <input type="text" name="type" pattern="[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+" title="Book type must contain only letters and spaces." required><br><br>
+            Total Page: <input type="number" name="tPage" min="1" title="Total pages must be at least 1." required><br><br>
+            Read Page: <input type="number" name="rPage" min="0" value="0" title="Read pages cannot be negative."><br><br>
             Status: 
             <select name="status">
                 <option value="not read">not read</option>
@@ -43,6 +43,8 @@
             </select><br><br>
             PDF File: <input type="file" name="pdfFile" accept=".pdf"><br><br>
             Image File: <input type="file" name="imageFile" accept="image/*"><br><br>
+            Comment / Note: <br>
+            <textarea name="comment" rows="3" cols="35" placeholder="Comments"></textarea><br><br>
             <input type="submit" value="add">
         </form>
         <br>

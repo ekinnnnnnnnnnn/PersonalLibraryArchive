@@ -27,14 +27,14 @@
         </p>
         
         <p>
-            Rating {% if book['rating'] %}{{book['rating']}}/10{% else %}No Rating{% endif %}
+            Rating {% if book['rating'] and book['rating'] > 0 %}{{book['rating']}}/10{% else %}No Rating{% endif %}
         </p>
-        {% if book['imageF'] %}
+        {% if book['imageF'] and book['imageF'] != 'not uploaded' %}
             <p>
                 <img src="{{ url_for('static', filename='uploads/' ~ book['imageF']) }}" alt="Book Image" style="width:200px;height:auto;">
             </p>
         {% endif %}
-        {% if book['pdfF'] %}
+        {% if book['pdfF'] and book['pdfF'] != 'not uploaded' %}
             <p>
                 <a href="{{ url_for('static', filename='uploads/' ~ book['pdfF']) }}" target="_blank">
                     View PDF
@@ -81,11 +81,11 @@
         </h3>
         <form action="/book/{{book['id']}}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="formType" value="edit">
-            Book name: <input type="text" name="bookname" value="{{book['bookname']}}"><br><br>
-            Author: <input type="text" name="author" value="{{book['author']}}"><br><br>
-            Type: <input type="text" name="type" value="{{book['type']}}"><br><br>
-            Total Page: <input type="text" name="tPage" value="{{book['tPage']}}"><br><br>
-            Read Page: <input type="text" name="rPage" value="{{book['rPage']}}"><br><br>
+            Book name: <input type="text" name="bookname" value="{{book['bookname']}}" required><br><br>
+            Author: <input type="text" name="author" value="{{book['author']}}" pattern="[a-zA-ZçÇğĞıİöÖşŞüÜ\s\.]+" title="Author name must contain only letters and spaces." required><br><br>
+            Type: <input type="text" name="type" value="{{book['type']}}" pattern="[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+" title="Book type must contain only letters and spaces." required><br><br>
+            Total Page: <input type="number" name="tPage" value="{{book['tPage']}}" min="1" title="Total pages must be at least 1." required><br><br>
+            Read Page: <input type="number" name="rPage" value="{{book['rPage']}}" min="0" title="Read pages cannot be negative."><br><br>
             PDF: <input type="file" name="pdf" accept=".pdf"><br><br>
             Image: <input type="file" name="image" accept="image/*"><br><br>
             <input type="submit" value="Save">

@@ -15,22 +15,22 @@ c.execute('''create table if not exists books(
           bookname text not null,
           author text not null,
           type text not null,
-          status text default 'not read',
-          rating integer,
+          status text not null default 'not read',
+          rating integer not null default 0,
           tPage integer not null,
-          rPage integer default 0,
-          pdfF text,
-          imageF text,
-          foreign key (userid) references user(id))''')
+          rPage integer not null default 0,
+          pdfF text not null default 'not uploaded',
+          imageF text not null default 'not uploaded',
+          foreign key (userid) references user(id) on delete cascade)''')
 
 c.execute('''create table if not exists comments(
           id integer primary key autoincrement,
           bookid integer not null,
           userid integer not null,
-          comment text,
-          date timestamp default current_timestamp,
-          foreign key (bookid) references books(id),
-          foreign key (userid) references user(id))''')
+          comment text not null,
+          date timestamp default current_timestamp not null,
+          foreign key (bookid) references books(id) on delete cascade,
+          foreign key (userid) references user(id) on delete cascade)''')
 
 conn.commit()
 conn.close()
